@@ -4,7 +4,7 @@ This guide is for developers using the `Comet Executor` to add execution capabil
 
 ## 1. Installation
 1.  In Visual Studio, right-click **References** in your Project Explorer.
-2.  Select **Add Reference...** and browse for the `PbH25VZfQpaY3dBu3Wri.dll`.
+2.  Select **Add Reference...** and browse for the `CometAPI.dll` or `CometAPI.NetCore.dll` for NetCore.
 3.  **CRITICAL:** Go to your **Project Properties > Build** and set the **Platform Target** to `x64`. 
     * *Note: Our loader core is 64-bit. If your project is set to "Any CPU" or "x86", the API will crash when you try to Attach.*
 
