@@ -1,0 +1,132 @@
+local Notification_Arctic = {}
+
+local TextService = game:GetService("TextService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
+
+local player = Players.LocalPlayer
+local pGui = player:WaitForChild("PlayerGui")
+
+local THEME = {
+    Background = Color3.fromRGB(15, 15, 15),
+    TextMain = Color3.fromRGB(255, 255, 255),
+    TextSecondary = Color3.fromRGB(180, 180, 180), 
+    LogoID = "rbxassetid://77154988270925",
+    HeaderHeight = 45,
+    Width = 300,
+    Padding = 20,
+    DisplayTime = 5,
+}
+
+local function sGUI()
+    local sg = pGui:FindFirstChild("arctic_notify")
+    if not sg then
+        sg = Instance.new("ScreenGui")
+        sg.Name = "arctic_notify"
+        sg.DisplayOrder = 9999
+        sg.ResetOnSpawn = false
+        sg.Parent = pGui
+    end
+    return sg
+end
+
+local function hello()
+    local s = Instance.new("Sound")
+    s.SoundId = "rbxassetid://137214903496040"
+    s.Volume = 0.5
+    s.Parent = SoundService
+    s:Play()
+    s.Ended:Connect(function() s:Destroy() end)
+end
+
+function Notification_Arctic:Notification(title, message)
+    task.spawn(function()
+        local sg = sGUI()
+        local titleText = title or "ARCTIC"
+        local descText = message or "No message provided."
+        
+        local font = Enum.Font.Gotham
+        local fontSize = 14
+        local maxTextWidth = THEME.Width - 30 
+        
+        local textBounds = TextService:GetTextSize(
+            descText, 
+            fontSize, 
+            font, 
+            Vector2.new(maxTextWidth, 1000)
+        )
+        
+        local targetFullHeight = THEME.HeaderHeight + textBounds.Y + THEME.Padding
+
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(0, 0, 0, THEME.HeaderHeight)
+        frame.Position = UDim2.new(0.5, 0, 0, 40)
+        frame.AnchorPoint = Vector2.new(0.5, 0)
+        frame.BackgroundColor3 = THEME.Background
+        frame.BorderSizePixel = 0
+        frame.ClipsDescendants = true
+        frame.Parent = sg
+
+        Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+        local logo = Instance.new("ImageLabel")
+        logo.Size = UDim2.new(0, 36, 0, 36)
+        logo.Position = UDim2.new(0, 15, 0, THEME.HeaderHeight/2)
+        logo.AnchorPoint = Vector2.new(0, 0.5)
+        logo.BackgroundTransparency = 1
+        logo.Image = THEME.LogoID
+        logo.Parent = frame
+
+        local tl = Instance.new("TextLabel")
+        tl.Size = UDim2.new(0, THEME.Width - 60, 0, THEME.HeaderHeight)
+        tl.Position = UDim2.new(0, 50, 0, 0)
+        tl.BackgroundTransparency = 1
+        tl.TextColor3 = THEME.TextMain
+        tl.TextSize = 16
+        tl.Font = Enum.Font.GothamBold
+        tl.Text = titleText:upper()
+        tl.TextXAlignment = Enum.TextXAlignment.Left
+        tl.Parent = frame
+
+        local ml = Instance.new("TextLabel")
+        ml.Size = UDim2.new(0, maxTextWidth, 0, textBounds.Y)
+        ml.Position = UDim2.new(0.5, 0, 0, THEME.HeaderHeight)
+        ml.AnchorPoint = Vector2.new(0.5, 0)
+        ml.BackgroundTransparency = 1
+        ml.TextColor3 = THEME.TextSecondary
+        ml.TextSize = fontSize
+        ml.Font = font
+        ml.Text = descText
+        ml.TextWrapped = true
+        ml.TextXAlignment = Enum.TextXAlignment.Center
+        ml.TextYAlignment = Enum.TextYAlignment.Top
+        ml.TextTransparency = 1
+        ml.Parent = frame
+
+        pcall(hello)
+
+        TweenService:Create(frame, TweenInfo.new(0.6, Enum.EasingStyle.Exponential), {
+            Size = UDim2.new(0, THEME.Width, 0, THEME.HeaderHeight)
+        }):Play()
+        
+        task.wait(0.7)
+
+        TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
+            Size = UDim2.new(0, THEME.Width, 0, targetFullHeight)
+        }):Play()
+        
+        TweenService:Create(ml, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+
+        task.wait(THEME.DisplayTime)
+        
+        local close = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, targetFullHeight),
+            BackgroundTransparency = 1
+        })
+        close:Play()
+        close.Completed:Connect(function() frame:Destroy() end)
+    end)
+end
+
+return Notification_Arctic
